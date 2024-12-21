@@ -1,0 +1,40 @@
+// File: <project>/<app-module>/build.gradle
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services' // Google Services plugin
+apply plugin: 'dev.flutter.flutter-gradle-plugin' // Flutter plugin
+
+android {
+    namespace 'com.example.orlogo' // Replace with your app's namespace
+    compileSdkVersion 33
+
+    defaultConfig {
+        applicationId "com.example.orlogo" // Replace with your app's package name
+        minSdkVersion 21
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug // Replace with your release signing config
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    // Import Firebase BoM (Bill of Materials)
+    implementation platform('com.google.firebase:firebase-bom:33.6.0')
+
+    // Add Firebase products you need, e.g., Firebase Analytics
+    implementation 'com.google.firebase:firebase-analytics'
+
+    // Other dependencies
+    implementation 'androidx.core:core:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+}

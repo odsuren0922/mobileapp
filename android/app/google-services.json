@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "494574958093",
+    "project_id": "mobile-lab-a2f0e",
+    "storage_bucket": "mobile-lab-a2f0e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:494574958093:android:a38d50de021bb9bf5dc744",
+        "android_client_info": {
+          "package_name": "com.example.orlogo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfC2izyF4w4v3hAcWFMWd0Vcn4QZuvjaY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
