@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:orlogo/screens/banklink.dart';
+
+void main() {
+  runApp(const MaterialApp(
+    home: AddCardScreen(),
+  ));
+}
 
 class AddCardScreen extends StatelessWidget {
   const AddCardScreen({super.key});
@@ -24,14 +31,40 @@ class AddCardScreen extends StatelessWidget {
         ],
         backgroundColor: const Color(0xFF00796B),
       ),
-      body: const Column(
+      body: Column(
         children: [
           // Tab Section
-          TabSection(),
+          const TabSection(),
           // Card Details
-          CardDetails(),
+          const CardDetails(),
           // Add Card Form
-          Expanded(child: AddCardForm()),
+          const Expanded(child: AddCardForm()),
+          // Add Button
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00796B),
+                minimumSize:
+                    const Size(double.infinity, 50), // Full-width button
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                // Navigate to BankLinkScreen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const BankLinkScreen()),
+                );
+              },
+              child: const Text(
+                "НЭМЭХ",
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -124,7 +157,7 @@ class AddCardForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Картны мэдээлэл нэмэх",
+              "Картын мэдээлэл нэмэх",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -188,8 +221,19 @@ class AddCardForm extends StatelessWidget {
   }
 }
 
-void main() {
-  runApp(const MaterialApp(
-    home: AddCardScreen(),
-  ));
+class BankLinkScreen extends StatelessWidget {
+  const BankLinkScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Bank Link"),
+        backgroundColor: const Color(0xFF00796B),
+      ),
+      body: const Center(
+        child: Text("Bank Link Page"),
+      ),
+    );
+  }
 }
