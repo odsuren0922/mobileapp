@@ -1,7 +1,22 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:orlogo/screens/wallet_screen.dart';
 
-void main() => runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyBESgkEquStBfTNt0lEsfelYOeJVc1Dtwc",
+      authDomain: "mobile-lab-a2f0e.firebaseapp.com",
+      projectId: "mobile-lab-a2f0e",
+      storageBucket: "mobile-lab-a2f0e.firebasestorage.app",
+      messagingSenderId: "494574958093",
+      appId: "1:494574958093:web:d556fbefbf2cfbf35dc744",
+    ),
+  );
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -13,6 +28,60 @@ class MyApp extends StatelessWidget {
       home: DashboardPage(),
     );
   }
+}
+
+class Transaction {
+  final String title;
+  final String subtitle;
+  final String amount;
+  final bool isIncome;
+  final String date;
+
+  Transaction({
+    required this.title,
+    required this.subtitle,
+    required this.amount,
+    required this.isIncome,
+    required this.date,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'subtitle': subtitle,
+      'amount': amount,
+      'isIncome': isIncome,
+      'date': date,
+    };
+  }
+
+  factory Transaction.fromMap(Map<String, dynamic> map) {
+    return Transaction(
+      title: map['title'],
+      subtitle: map['subtitle'],
+      amount: map['amount'],
+      isIncome: map['isIncome'],
+      date: map['date'],
+    );
+  }
+}
+
+Future<void> addTransaction(Transaction transaction) async {
+  final transactionRef =
+      FirebaseFirestore.instance.collection('transactions').doc();
+  await transactionRef.set(transaction.toMap());
+}
+
+Stream<List<Transaction>> getTransactions() {
+  return FirebaseFirestore.instance
+      .collection('transactions')
+      .orderBy('date', descending: true)
+      .snapshots()
+      .map((snapshot) {
+    return snapshot.docs.map((doc) {
+      return Transaction.fromMap(doc.data());
+    }).toList();
+  });
 }
 
 class DashboardPage extends StatelessWidget {
@@ -42,7 +111,7 @@ class DashboardPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-            // Нийт үлдэгдлийн хэсэг
+            // Нийт үлдэгдэл хэсэг
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -92,113 +161,51 @@ class DashboardPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            _buildTransactionItem(
-              title: 'Upwork',
-              subtitle: 'Өчигдөр',
-              amount: '+ \$850.00',
-              isIncome: true,
-              icon: Icons.work,
-            ),
-            _buildTransactionItem(
-              title: 'Шилжүүлэг',
-              subtitle: 'Өчигдөр',
-              amount: '- \$85.00',
-              isIncome: false,
-              icon: Icons.send,
-            ),
-            _buildTransactionItem(
-              title: 'Paypal',
-              subtitle: 'Jan 30, 2022',
-              amount: '+ \$1,406.00',
-              isIncome: true,
-              icon: Icons.payment,
-            ),
-            _buildTransactionItem(
-              title: 'Youtube',
-              subtitle: 'Jan 16, 2022',
-              amount: '- \$11.99',
-              isIncome: false,
-              icon: Icons.video_library,
+            StreamBuilder<List<Transaction>>(
+              stream: getTransactions(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Алдаа: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('Гүйлгээ байхгүй.'));
+                }
+
+                final transactions = snapshot.data!;
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: transactions.length,
+                  itemBuilder: (context, index) {
+                    final transaction = transactions[index];
+                    return _buildTransactionItem(
+                      title: transaction.title,
+                      subtitle: transaction.subtitle,
+                      amount: transaction.amount,
+                      isIncome: transaction.isIncome,
+                      icon: Icons.payment, // Хэрэглэх тохиромжтой icon
+                    );
+                  },
+                );
+              },
             ),
             const SizedBox(height: 20),
-            // Send Again хэсэг
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Send Again',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.teal,
-                  ),
-                ),
-                Text(
-                  'See all',
-                  style: TextStyle(color: Colors.teal, fontSize: 14),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildUserAvatar('orlogo.jpg'),
-                _buildUserAvatar('orlogo.jpg'),
-                _buildUserAvatar('orlogo.jpg'),
-                _buildUserAvatar('orlogo.jpg'),
-              ],
-            ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Add new transaction logic
+          // Жишээ: Шинэ орлого эсвэл зарлага нэмэх
+          addTransaction(Transaction(
+            title: 'Шинэ орлого',
+            subtitle: 'Өнөөдөр',
+            amount: '+ \$100.00',
+            isIncome: true,
+            date: DateTime.now().toString(),
+          ));
         },
         backgroundColor: Colors.teal,
         child: const Icon(Icons.add, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 10,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.home, color: Colors.teal),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const DashboardPage(),
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.bar_chart, color: Colors.teal),
-              onPressed: () {},
-            ),
-            const SizedBox(width: 50),
-            IconButton(
-              icon: const Icon(Icons.wallet, color: Colors.teal),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const WalletScreen(),
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.person, color: Colors.teal),
-              onPressed: () {},
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -224,13 +231,6 @@ class DashboardPage extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
-    );
-  }
-
-  Widget _buildUserAvatar(String assetPath) {
-    return CircleAvatar(
-      radius: 24,
-      backgroundImage: AssetImage(assetPath),
     );
   }
 }
