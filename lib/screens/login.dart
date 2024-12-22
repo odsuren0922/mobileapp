@@ -1,9 +1,57 @@
+import 'package:firebase_auth_web/firebase_auth_web.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:orlogo/screens/Register_screen.dart';
 import 'package:orlogo/screens/dashboard_page.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  // Firebase login function
+  Future<void> _loginUser() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Firebase-д нэвтрэх
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Амжилттай нэвтэрвэл DashboardPage рүү шилжих
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardPage()),
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = 'Алдаа гарлаа. Та дахин оролдоно уу.';
+      if (e.code == 'user-not-found') {
+        message = 'Ийм хэрэглэгч олдсонгүй.';
+      } else if (e.code == 'wrong-password') {
+        message = 'Нууц үг буруу байна.';
+      }
+
+      // Алдааны мессеж харуулах
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,20 +94,13 @@ class LoginScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               children: [
-                _buildTextField('Enter your email address'),
+                _buildTextField(_emailController, 'Enter your email address'),
                 const SizedBox(height: 16),
-                _buildTextField('Enter your password', obscureText: true),
+                _buildTextField(_passwordController, 'Enter your password',
+                    obscureText: true),
                 const SizedBox(height: 32),
                 ElevatedButton(
-                  onPressed: () {
-                    // DashboardPage ruu shiljih
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const DashboardPage(),
-                      ),
-                    );
-                  },
+                  onPressed: _isLoading ? null : _loginUser,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 100),
@@ -68,14 +109,16 @@ class LoginScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  child: const Text(
-                    'Нэвтрэх',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Нэвтрэх',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -87,7 +130,6 @@ class LoginScreen extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        // RegisterScreen shiljih
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -114,8 +156,10 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(String hint, {bool obscureText = false}) {
+  Widget _buildTextField(TextEditingController controller, String hint,
+      {bool obscureText = false}) {
     return TextField(
+      controller: controller,
       obscureText: obscureText,
       decoration: InputDecoration(
         hintText: hint,

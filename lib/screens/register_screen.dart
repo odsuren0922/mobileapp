@@ -1,8 +1,71 @@
+import 'package:firebase_auth_web/firebase_auth_web.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:orlogo/screens/login.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  bool _isLoading = false;
+
+  // Firebase бүртгэлийн функц
+  Future<void> _registerUser() async {
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Нууц үг хоорондоо таарахгүй байна!')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Firebase хэрэглэгч
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Амжилттай бүртгэгдлээ!')),
+      );
+
+      // Нэвтрэх хуудас руу шилжүүлэх
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = 'Алдаа гарлаа. Та дахин оролдоно уу.';
+      if (e.code == 'email-already-in-use') {
+        message = 'Энэ имэйл бүртгэгдсэн байна.';
+      } else if (e.code == 'invalid-email') {
+        message = 'Буруу имэйл хаяг байна.';
+      } else if (e.code == 'weak-password') {
+        message = 'Нууц үг шаардлага хангахгүй байна';
+      }
+
+      // Алдааны мессеж харуулах
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,23 +112,19 @@ class RegisterScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildTextField('Бүтэн нэрээ оруулна уу?'),
+                  _buildTextField(_nameController, 'Нэрээ оруулна уу?'),
                   const SizedBox(height: 16),
-                  _buildTextField('Имэйлээ оруулна уу?'),
+                  _buildTextField(_emailController, 'Имэйлээ оруулна уу?'),
                   const SizedBox(height: 16),
-                  _buildTextField('Нууц үгээ оруулна уу?', obscureText: true),
+                  _buildTextField(_passwordController, 'Нууц үгээ оруулна уу?',
+                      obscureText: true),
                   const SizedBox(height: 16),
-                  _buildTextField('Нууц үгээ давтан оруулна уу?',
+                  _buildTextField(_confirmPasswordController,
+                      'Нууц үгээ давтан оруулна уу?',
                       obscureText: true),
                   const SizedBox(height: 32),
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginScreen()),
-                      );
-                    },
+                    onPressed: _isLoading ? null : _registerUser,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           vertical: 15, horizontal: 80),
@@ -74,13 +133,16 @@ class RegisterScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    child: const Text(
-                      'Бүртгүүлэх',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87),
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            'Бүртгүүлэх',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -114,8 +176,10 @@ class RegisterScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(String hint, {bool obscureText = false}) {
+  Widget _buildTextField(TextEditingController controller, String hint,
+      {bool obscureText = false}) {
     return TextField(
+      controller: controller,
       obscureText: obscureText,
       decoration: InputDecoration(
         hintText: hint,

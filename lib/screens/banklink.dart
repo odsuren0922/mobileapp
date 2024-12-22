@@ -5,6 +5,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -14,23 +16,25 @@ class MyApp extends StatelessWidget {
 }
 
 class BankLinkScreen extends StatelessWidget {
+  const BankLinkScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.teal,
         elevation: 0,
-        title: Text(
+        title: const Text(
           'Түрийвчтэй холбох',
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {},
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications, color: Colors.white),
+            icon: const Icon(Icons.notifications, color: Colors.white),
             onPressed: () {},
           ),
         ],
@@ -40,21 +44,21 @@ class BankLinkScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ToggleButtons(
-              isSelected: [true, false],
+              isSelected: const [true, false],
               borderRadius: BorderRadius.circular(8),
               fillColor: Colors.teal,
               selectedColor: Colors.white,
               color: Colors.teal,
-              constraints: BoxConstraints.expand(width: 120, height: 40),
-              children: [
+              constraints: const BoxConstraints.expand(width: 120, height: 40),
+              children: const [
                 Text('Картууд'),
                 Text('Аккаунт'),
               ],
               onPressed: (int index) {},
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildOptionTile(
               context,
               icon: Icons.account_balance,
@@ -76,7 +80,7 @@ class BankLinkScreen extends StatelessWidget {
               subtitle: 'Connect your paypal account',
               isSelected: false,
             ),
-            Spacer(),
+            const Spacer(),
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
@@ -86,10 +90,10 @@ class BankLinkScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  minimumSize: Size(double.infinity, 50),
+                  minimumSize: const Size(double.infinity, 50),
                 ),
                 onPressed: () {},
-                child: Text(
+                child: const Text(
                   'ДАРААХ',
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
@@ -117,14 +121,15 @@ class BankLinkScreen extends StatelessWidget {
         leading: Icon(icon, color: Colors.teal),
         title: Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.teal,
           ),
         ),
         subtitle: Text(subtitle),
-        trailing:
-            isSelected ? Icon(Icons.check_circle, color: Colors.teal) : null,
+        trailing: isSelected
+            ? const Icon(Icons.check_circle, color: Colors.teal)
+            : null,
       ),
     );
   }

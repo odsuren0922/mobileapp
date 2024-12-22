@@ -61,7 +61,7 @@ class AddCardScreen extends StatelessWidget {
               },
               child: const Text(
                 "НЭМЭХ",
-                style: TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(color: Colors.black, fontSize: 16),
               ),
             ),
           ),
