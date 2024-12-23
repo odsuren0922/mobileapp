@@ -20,6 +20,7 @@ dependencies:
   firebase_auth_web: ^5.13.5  # Шинэ хувилбар
   cloud_firestore: ^5.6.0   # Хамгийн сүүлийн тогтвортой хувилбар
   firebase_storage: ^12.3.7
+  
 
 
 

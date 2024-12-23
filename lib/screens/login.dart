@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Амжилттай нэвтэрвэл DashboardPage рүү шилжих
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const DashboardPage()),
+        MaterialPageRoute(builder: (context) => FinancialDashboard()),
       );
     } on FirebaseAuthException catch (e) {
       String message = 'Алдаа гарлаа. Та дахин оролдоно уу.';
