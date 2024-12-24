@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:orlogo/screens/addexpensescreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -238,23 +239,10 @@ class _AccountTabState extends State<AccountTab> {
           padding: const EdgeInsets.all(16.0),
           child: ElevatedButton(
             onPressed: () {
-              final selectedAccounts = accounts
-                  .where((account) => account['isSelected'])
-                  .map((account) => account['title'])
-                  .toList();
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Selected Accounts'),
-                  content: Text(selectedAccounts.isEmpty
-                      ? 'No accounts selected.'
-                      : selectedAccounts.join(', ')),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('OK'),
-                    ),
-                  ],
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddExpenseScreen(),
                 ),
               );
             },
