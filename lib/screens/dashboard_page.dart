@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:orlogo/screens/wallet_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,7 @@ class FinancialDashboard extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.teal,
         elevation: 0,
+        leading: Icon(Icons.menu, color: Colors.white),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -50,15 +52,17 @@ class FinancialDashboard extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications),
+            icon: Icon(Icons.notifications, color: Colors.white),
             onPressed: () {},
-          )
+          ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Balance Card
             Card(
               color: Colors.teal,
               shape: RoundedRectangleBorder(
@@ -141,6 +145,13 @@ class FinancialDashboard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 16),
+            Text(
+              'Гүйлгээний Түүх',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             Expanded(
               child: StreamBuilder(
                 stream: _firestore.collection('transactions').snapshots(),
@@ -187,6 +198,34 @@ class FinancialDashboard extends StatelessWidget {
                 },
               ),
             ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Send Again',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: Text('See all'),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                CircleAvatar(radius: 25, backgroundColor: Colors.grey[300]),
+                SizedBox(width: 8),
+                CircleAvatar(radius: 25, backgroundColor: Colors.grey[300]),
+                SizedBox(width: 8),
+                CircleAvatar(radius: 25, backgroundColor: Colors.grey[300]),
+                SizedBox(width: 8),
+                CircleAvatar(radius: 25, backgroundColor: Colors.grey[300]),
+              ],
+            ),
           ],
         ),
       ),
@@ -203,6 +242,14 @@ class FinancialDashboard extends StatelessWidget {
         child: Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        onTap: (index) {
+          if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => WalletScreen()),
+            );
+          }
+        },
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
