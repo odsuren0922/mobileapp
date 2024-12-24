@@ -9,9 +9,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const PaymentSuccessScreen(),
+      home: PaymentSuccessScreen(),
     );
   }
 }
@@ -37,9 +37,9 @@ class PaymentSuccessScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            Center(
+            const Center(
               child: Column(
-                children: const [
+                children: [
                   Text(
                     "Амжилттай Төлөгдлөө",
                     style: TextStyle(
@@ -91,7 +91,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                   Container(
                     width: 120,
                     height: 120,
-                    color: Colors.grey[200], // QR кодыг энд байрлуулна.
+                    color: Colors.grey[200],
                     child: const Center(
                       child: Text(
                         "QR Code",
@@ -102,7 +102,6 @@ class PaymentSuccessScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      // Share receipt logic
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('!')),
                       );

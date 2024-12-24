@@ -10,9 +10,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const WalletScreen(),
+      home: WalletScreen(),
     );
   }
 }
@@ -75,17 +75,17 @@ class CardsTab extends StatelessWidget {
                   color: Colors.teal,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                child: const Padding(
+                  padding: EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Debit Card',
                         style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
-                      const Text(
+                      Text(
                         '6219 8610 2888 8075',
                         style: TextStyle(
                             color: Colors.white,
@@ -95,7 +95,7 @@ class CardsTab extends StatelessWidget {
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
+                        children: [
                           Text(
                             'IRVAN MOSES',
                             style: TextStyle(color: Colors.white, fontSize: 16),

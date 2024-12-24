@@ -1,62 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:orlogo/screens/banklink.dart';
-
-void main() {
-  runApp(const MaterialApp(
-    home: AddCardScreen(),
-  ));
-}
+import 'firebase_service.dart';
 
 class AddCardScreen extends StatelessWidget {
   const AddCardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final FirebaseService firebaseService = FirebaseService();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Түрийч цэнэглэх"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            // Back action
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // Notification action
-            },
-          ),
-        ],
+        title: const Text("Түрийвч цэнэглэх"),
         backgroundColor: const Color(0xFF00796B),
       ),
       body: Column(
         children: [
-          // Tab Section
           const TabSection(),
-          // Card Details
           const CardDetails(),
-          // Add Card Form
           const Expanded(child: AddCardForm()),
-          // Add Button
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00796B),
-                minimumSize:
-                    const Size(double.infinity, 50), // Full-width button
+                minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              onPressed: () {
-                // Navigate to BankLinkScreen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const BankLinkScreen()),
+              onPressed: () async {
+                // Жишээ гүйлгээ хадгалах
+                await firebaseService.saveTransaction(
+                  type: "income",
+                  amount: 10000,
+                  cardNumber: "6219861028888075",
+                  date: DateTime.now(),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Transaction saved!")),
                 );
               },
               child: const Text(
@@ -145,94 +126,170 @@ class CardDetails extends StatelessWidget {
   }
 }
 
-class AddCardForm extends StatelessWidget {
+class AddCardForm extends StatefulWidget {
   const AddCardForm({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(16.0),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Картын мэдээлэл нэмэх",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF00796B),
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              "Энэ холбоос карт нь зөвхөн таны нэр дээр байх ёстой.",
-              style: TextStyle(color: Colors.grey),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              decoration: InputDecoration(
-                labelText: "КАРТ ДЭЭРХ НЭР",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              decoration: InputDecoration(
-                labelText: "КАРТЫН ДУГААР",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: TextField(
-                    decoration: InputDecoration(
-                      labelText: "CVC",
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    decoration: InputDecoration(
-                      labelText: "ДУУСАХ ХУГАЦАА YYYY/MM",
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            TextField(
-              decoration: InputDecoration(
-                labelText: "ZIP",
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  _AddCardFormState createState() => _AddCardFormState();
 }
 
-class BankLinkScreen extends StatelessWidget {
-  const BankLinkScreen({super.key});
+class _AddCardFormState extends State<AddCardForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _firebaseService = FirebaseService();
+
+  final _nameController = TextEditingController();
+  final _cardNumberController = TextEditingController();
+  final _cvcController = TextEditingController();
+  final _expiryDateController = TextEditingController();
+  final _zipController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _cardNumberController.dispose();
+    _cvcController.dispose();
+    _expiryDateController.dispose();
+    _zipController.dispose();
+    super.dispose();
+  }
+
+  void _saveCard() async {
+    if (_formKey.currentState!.validate()) {
+      await _firebaseService.saveCard(
+        name: _nameController.text,
+        cardNumber: _cardNumberController.text,
+        cvc: _cvcController.text,
+        expiryDate: _expiryDateController.text,
+        zip: _zipController.text,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Карт амжилттай хадгалагдлаа!")),
+      );
+      _formKey.currentState!.reset();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Bank Link"),
-        backgroundColor: const Color(0xFF00796B),
-      ),
-      body: const Center(
-        child: Text("Bank Link Page"),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Картын мэдээлэл нэмэх",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF00796B),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: "КАРТ ДЭЭРХ НЭР",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Нэр оруулна уу!";
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _cardNumberController,
+                decoration: const InputDecoration(
+                  labelText: "КАРТЫН ДУГААР",
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Картын дугаар оруулна уу!";
+                  }
+                  if (value.length != 16) {
+                    return "Картын дугаар 16 оронтой байх ёстой!";
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: TextFormField(
+                      controller: _cvcController,
+                      decoration: const InputDecoration(
+                        labelText: "CVC",
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "CVC оруулна уу!";
+                        }
+                        if (value.length != 3) {
+                          return "CVC 3 оронтой байх ёстой!";
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _expiryDateController,
+                      decoration: const InputDecoration(
+                        labelText: "ДУУСАХ ХУГАЦАА YYYY/MM",
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Хугацаа оруулна уу!";
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _zipController,
+                decoration: const InputDecoration(
+                  labelText: "ZIP",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "ZIP код оруулна уу!";
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _saveCard,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF00796B),
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text("Карт хадгалах"),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

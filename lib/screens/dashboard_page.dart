@@ -10,6 +10,8 @@ void main() async {
 }
 
 class FinancialApp extends StatelessWidget {
+  const FinancialApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,6 +24,24 @@ class FinancialApp extends StatelessWidget {
 class FinancialDashboard extends StatelessWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  FinancialDashboard({super.key});
+  Stream<double> _getBalance() {
+    return _firestore.collection('transactions').snapshots().map((snapshot) {
+      double income = 0;
+      double expense = 0;
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        if (data['type'] == 'income') {
+          income += data['amount'];
+        } else if (data['type'] == 'expense') {
+          expense += data['amount'];
+        }
+      }
+
+      return income - expense;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,8 +49,8 @@ class FinancialDashboard extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.teal,
         elevation: 0,
-        leading: Icon(Icons.menu, color: Colors.white),
-        title: Column(
+        leading: const Icon(Icons.menu, color: Colors.white),
+        title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -52,7 +72,7 @@ class FinancialDashboard extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications, color: Colors.white),
+            icon: const Icon(Icons.notifications, color: Colors.white),
             onPressed: () {},
           ),
         ],
@@ -76,76 +96,119 @@ class FinancialDashboard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           'Нийт үлдэгдэл',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
                           ),
                         ),
-                        Icon(
+                        const Icon(
                           Icons.more_vert,
                           color: Colors.white,
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
-                    Text(
-                      '\$2,548.00',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    const SizedBox(height: 8),
+                    StreamBuilder<double>(
+                      stream: _getBalance(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (!snapshot.hasData) {
+                          return const Text(
+                            'Амжилтгүй',
+                            style: TextStyle(color: Colors.white, fontSize: 36),
+                          );
+                        }
+
+                        final balance = snapshot.data!;
+                        return Text(
+                          '\$${balance.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        );
+                      },
                     ),
-                    SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: 16),
+                    StreamBuilder<QuerySnapshot>(
+                      stream: _firestore.collection('transactions').snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const CircularProgressIndicator();
+                        }
+
+                        final transactions = snapshot.data!.docs;
+                        double income = 0;
+                        double expense = 0;
+
+                        // Орлого болон зарлагыг тооцоолох
+                        for (var doc in transactions) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          if (data['type'] == 'income') {
+                            income += data['amount'];
+                          } else if (data['type'] == 'expense') {
+                            expense += data['amount'];
+                          }
+                        }
+
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Орлого',
-                              style: TextStyle(color: Colors.white70),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Орлого',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '\$${income.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 4),
-                            Text(
-                              '\$1,840.00',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Зарлага',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '\$${expense.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Зарлага',
-                              style: TextStyle(color: Colors.white70),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              '\$284.00',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    )
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
             ),
-            SizedBox(height: 16),
-            Text(
+            const SizedBox(height: 16),
+            const Text(
               'Гүйлгээний Түүх',
               style: TextStyle(
                 fontSize: 18,
@@ -157,7 +220,7 @@ class FinancialDashboard extends StatelessWidget {
                 stream: _firestore.collection('transactions').snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (!snapshot.hasData) {
-                    return Center(
+                    return const Center(
                       child: CircularProgressIndicator(),
                     );
                   }
@@ -198,11 +261,11 @@ class FinancialDashboard extends StatelessWidget {
                 },
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Send Again',
                   style: TextStyle(
                     fontSize: 16,
@@ -211,18 +274,18 @@ class FinancialDashboard extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {},
-                  child: Text('See all'),
+                  child: const Text('See all'),
                 ),
               ],
             ),
             Row(
               children: [
                 CircleAvatar(radius: 25, backgroundColor: Colors.grey[300]),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 CircleAvatar(radius: 25, backgroundColor: Colors.grey[300]),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 CircleAvatar(radius: 25, backgroundColor: Colors.grey[300]),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 CircleAvatar(radius: 25, backgroundColor: Colors.grey[300]),
               ],
             ),
@@ -239,18 +302,18 @@ class FinancialDashboard extends StatelessWidget {
           });
         },
         backgroundColor: Colors.teal,
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
           if (index == 1) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => WalletScreen()),
+              MaterialPageRoute(builder: (context) => const WalletScreen()),
             );
           }
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',

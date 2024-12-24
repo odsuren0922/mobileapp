@@ -6,6 +6,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -16,6 +18,8 @@ class MyApp extends StatelessWidget {
 }
 
 class BillPaymentScreen extends StatelessWidget {
+  const BillPaymentScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,25 +62,25 @@ class BillPaymentScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   Text('Үнэ', style: TextStyle(fontSize: 14)),
                   Text('\$11.99', style: TextStyle(fontSize: 14)),
                 ],
               ),
               const SizedBox(height: 10),
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   Text('Хураамж', style: TextStyle(fontSize: 14)),
                   Text('\$1.99', style: TextStyle(fontSize: 14)),
                 ],
               ),
               const Divider(height: 30, thickness: 1),
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   Text('Нийт',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -100,7 +104,7 @@ class BillPaymentScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => PaymentSuccessScreen(),
+                      builder: (context) => const PaymentSuccessScreen(),
                     ),
                   );
                 },
